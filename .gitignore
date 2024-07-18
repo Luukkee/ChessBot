@@ -1,7 +1,7 @@
 # Byte-compiled 
-__pycache__/
+__pycache__
 #Virtual environment
-venv/
-env/
-.venv/
-.env/
+venv
+env
+.venv
+.env
