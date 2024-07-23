@@ -6,6 +6,9 @@ import chess as chess
 "  CHESS GAME    "
 """"""""""""""""""
 
+#TODO: FIX INTEGRATION BETWEEN GAME AND MODEL SO THAT THE MODEL CAN BE USED TO MAKE MOVES ON IN THE GAME
+
+
 # Initialize Pygame
 pygame.init()
 
@@ -19,7 +22,7 @@ WHITE = (240, 217, 181)  # Light beige
 BLACK = (181, 136, 99)    # Dark brown
 HIGHLIGHT_COLOR = (255, 0, 0)  # Red
 
-# Load images (ensure you have images for each piece)
+# Load images
 def load_images():
     pieces = ['king', 'queen', 'rook', 'bishop', 'knight', 'pawn']
     colors = ['white', 'black']
