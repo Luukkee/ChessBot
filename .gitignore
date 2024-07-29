@@ -5,3 +5,9 @@ venv
 env
 .venv
 .env
+#datasets and database
+*.db
+*.db-shm
+*.db-wal
+.zip
+Datasets
