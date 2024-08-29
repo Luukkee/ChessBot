@@ -11,3 +11,5 @@ env
 *.db-wal
 .zip
 Datasets
+#Saved models
+*.pth
