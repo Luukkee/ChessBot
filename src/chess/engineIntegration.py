@@ -48,7 +48,6 @@ def select_next_move(played_moves, matching_openings, rand = True):
     if not matching_openings:
         return None  # No matching opening found, time for engine
 
-    
     if rand:
         chosen_opening = random.choice(matching_openings)
 
@@ -65,23 +64,25 @@ def select_next_move(played_moves, matching_openings, rand = True):
 def board_to_input(board, is_white):
     board_planes = torch.zeros((8, 8, 13), dtype=torch.float32)
 
-    # Iterate over the board's rows and columns (flipped, so row 0 is black's side)
+    # Iterate over the board's rows and columns (flipped, so row 0 is black's side) 
+    # because the developer was naive enough to believe it would not matter 
+    # and lazy enough to find temporary solutions to the problem along the way
     for row in range(8):
         for col in range(8):
             piece = board.piece_at(row, col)  # Get the piece at the current (row, col)
             if piece:
                 # Determine the plane based on the piece id and color
-                plane = piece.id - 1  # Assuming piece.id ranges from 1 to 6 (pawn, knight, etc.)
-                if piece.color == 'black':  # Assuming 'black' and 'white' are used for colors
+                plane = piece.id - 1  # piece.id ranges from 1 to 6 (pawn, knight, etc.)
+                if piece.color == 'black':
                     plane += 6  # Shift to black piece planes (6-11)
 
-                # Invert the row index since row 0 on your board is actually row 7 in the neural net input
+                # Invert the row index since row 0 on my board is actually row 7 in the neural net input
                 inverted_row = 7 - row
 
                 # Place the piece on the correct plane in the board_planes array
                 board_planes[inverted_row, col, plane] = 1
 
-    # Set the last plane to indicate which side is to move (1 for white, 0 for black)
+    # Set the last plane to indicate which side the engine is playing (1 for white, 0 for black)
     board_planes[:, :, 12] = 1.0 if is_white else 0.0
     board_input = board_planes.unsqueeze(0).permute(0, 3, 1, 2) 
 
@@ -102,8 +103,9 @@ def predict_move(model, board):
         print(from_square)
         to_square = move_index % 64
         move = chess.Move(from_square, to_square)
-        #if pawn and last character is 1 or eight, add 'q' to the move
-        #Hopefully this works, always promotes to queen
+        # If pawn and last character is 1 or eight, add 'q' to the move
+        # Hopefully this works, always promotes to queen
+        # Might be redundant right now
         if board.piece_at((7-from_square // 8), (to_square % 8)) and board.piece_at((7-from_square // 8), (to_square % 8)).piece_type == "pawn" and (str(move)[-1] == '1' or str(move)[-1] == '8'):
             move = chess.Move(from_square, to_square, promotion=5) 
         print(move, move_scores.values[move_index].item())
@@ -163,12 +165,13 @@ class Engine:
             next_move = select_next_move(self.played_moves, matching_openings)
         if self.opening_phase and next_move:
             self.played_moves.append(next_move)
-            print(next_move)
             fen = board.generate_fen()
             tmp_board = chess.Board(fen)
             move = tmp_board.parse_san(next_move)
-            move = board.parse_move(move) #Really ugly, but i made my own parse_move in the board class. Does not look pretty right below the Chess library's parse_san, but theirs simplyfy the notation while mine converts it to the notation my board uses.
-            print(move)
+            # Really ugly, but I made my own parse_move in the board class. 
+            # Does not look pretty right below the Chess library's parse_san, 
+            # but theirs simplify the notation while mine converts it to the notation my board uses.
+            move = board.parse_move(move) 
             del tmp_board
             return move
         else:

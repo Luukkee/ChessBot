@@ -7,9 +7,6 @@ from engineIntegration import Engine
 "  CHESS GAME    "
 """"""""""""""""""
 
-#TODO: FIX INTEGRATION BETWEEN GAME AND MODEL SO THAT THE MODEL CAN BE USED TO MAKE MOVES ON IN THE GAME
-
-
 # Initialize Pygame
 pygame.init()
 
@@ -160,10 +157,6 @@ def main():
                         col = pos[0] // SQUARE_SIZE
                         row = pos[1] // SQUARE_SIZE
                         if board.move_piece(selected_pos, (row, col), engine):
-                            #remember move for engine
-                            #move = (selected_pos, (row, col))
-                            #print(move)
-                            #engine.update(move, board)
                             selected_piece = None
                             selected_pos = None
                             valid_moves = []

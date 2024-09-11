@@ -212,7 +212,7 @@ class Board:
         self.en_passant_target = self.parse_en_passant(parts[3]) if parts[3] != '-' else None
         
         # Clear the board and place the pieces from the FEN string
-        self.board = [[None for _ in range(8)] for _ in range(8)]  # Empty board
+        self.board = [[None for _ in range(8)] for _ in range(8)] 
         ranks = piece_placement.split('/')
         for rank_idx, rank in enumerate(ranks):
             file_idx = 0
@@ -283,21 +283,20 @@ class Board:
         turn = 'w' if self.current_turn == 'white' else 'b'
         castling = self.get_castling_rights_fen()
         en_passant = self.get_en_passant_fen()
-        halfmove_clock = '0'  # You can extend this with actual half-move tracking
-        fullmove_number = '1'  # You can extend this with actual full-move tracking
+        halfmove_clock = '0'  
+        fullmove_number = '1' # Not caring enough to implement this
 
         return f"{piece_placement} {turn} {castling} {en_passant} {halfmove_clock} {fullmove_number}"
 
     def algebraic_to_index(self, square):
         """
         Convert from algebraic notation (e.g., 'd2') to (row, col).
-        'a'-'h' -> 0-7 and '1'-'8' -> 7-0 (row, col).
-        This inverts the row since index 0 is the top row (for black pieces).
+        'a'-'h' -> 0-7 and '1'-'8'.
         """
         files = 'abcdefgh'  # Columns 'a'-'h'
         col = files.index(square[0])  # Get column index from 'a'-'h'
-        row = int(square[1]) - 1  # Get row index (invert rank: '1' is row 7, '8' is row 0)
-        return (row, col)  # Invert row for your board
+        row = int(square[1]) - 1  # Get row index 
+        return (row, col)  # Does not invert board here because it gets inverted later
 
     def square_to_algebraic(self, row, col):
         """
@@ -337,9 +336,13 @@ class Board:
         return from_pos, to_pos
 
     def create_board(self):
+        """
+        Create a new chess board with pieces in starting positions.
+        Only called if no FEN string is provided.
+        """
         # Create an 8x8 board with pieces placed in starting positions
         board = [[None for _ in range(8)] for _ in range(8)]
-        # Place pieces on the board (this is just an example)
+        # Place pieces on the board 
         board[0][0] = Rook('black')
         board[0][7] = Rook('black')
         board[7][7] = Rook('white')
@@ -367,7 +370,6 @@ class Board:
 
     def move_piece(self, start_pos, end_pos, engine):
         piece = self.piece_at(*start_pos)
-        #print(piece)
 
         if piece and piece.color == self.current_turn:
             if end_pos in piece.get_moves(self, *start_pos):
@@ -386,6 +388,7 @@ class Board:
         return False
 
     def is_valid_move(self, start_pos, end_pos):
+        # TODO: Implement functionality for forced moves (eg. checks)
         piece = self.piece_at(*start_pos)
         if piece and piece.color == self.current_turn:
             return end_pos in piece.get_moves(self, *start_pos)
@@ -406,19 +409,18 @@ class Board:
 
     def handle_special_moves(self, piece, start_pos, end_pos):
         print(end_pos)
-        #takes with en passant
+        # takes with en passant
         if piece.piece_type == 'pawn' and end_pos == self.en_passant_target:
             self.board[start_pos[0]][end_pos[1]] = None
-        #Handle en passant
+        # Handle en passant
         if piece.piece_type == 'pawn' and abs(start_pos[0] - end_pos[0]) == 2:
             self.en_passant_target = ((start_pos[0] + end_pos[0]) // 2, start_pos[1])
         else:
             self.en_passant_target = None
-        #Promotion, choose queen for now
-        #TODO: Add a way to choose promotion piece
+        # Promotion
         if piece.piece_type == 'pawn' and (end_pos[0] == 0 or end_pos[0] == 7):
             self.promotion = end_pos
-        #Handle castling
+        # Handle castling
         if piece.piece_type == 'king' and abs(start_pos[1] - end_pos[1]) == 2:
             if end_pos[1] == 6:
                 self.board[end_pos[0]][5] = self.board[end_pos[0]][7]
@@ -426,7 +428,7 @@ class Board:
             elif end_pos[1] == 2:
                 self.board[end_pos[0]][3] = self.board[end_pos[0]][0]
                 self.board[end_pos[0]][0] = None
-        #Update castling rights
+        # Update castling rights
         if piece.piece_type == 'rook' and start_pos[1] == 0:
             self.castling_rights[piece.color]['queenside'] = False
         elif piece.piece_type == 'rook' and start_pos[1] == 7:
@@ -436,8 +438,9 @@ class Board:
             self.castling_rights[piece.color]['queenside'] = False
 
 
-    #Handle check and
+    # Handle check
     def is_under_attack(self, row, col, color):
+        # TODO: Re-check thisfunction
         opponent_color = 'black' if color == 'white' else 'white'
         for r in range(8):
             for c in range(8):
