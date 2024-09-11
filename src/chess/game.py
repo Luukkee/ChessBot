@@ -1,6 +1,7 @@
 import pygame
 import sys
-import chess as chess
+import chessLogic as chess
+from engineIntegration import Engine
 
 """"""""""""""""""
 "  CHESS GAME    "
@@ -87,9 +88,30 @@ def draw_promotion_window(win, board):
                 running = False
     sys.exit()
 
+def choose_color(win):
+    font = pygame.font.SysFont(None, 48)
+    white_text = font.render("Play as White", True, (0, 0, 0))
+    black_text = font.render("Play as Black", True, (0, 0, 0))
 
+    white_rect = white_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
+    black_rect = black_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
 
-    
+    while True:
+        win.fill(WHITE)
+        win.blit(white_text, white_rect)
+        win.blit(black_text, black_rect)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                if white_rect.collidepoint(pos):
+                    return 'white'
+                if black_rect.collidepoint(pos):
+                    return 'black'
 
 # Main function
 def main():
@@ -98,6 +120,9 @@ def main():
     images = load_images()
     board = chess.Board()  # Create a new board
 
+    player_color = choose_color(win)
+    engine_color = 'black' if player_color == 'white' else 'white'
+    engine = Engine(engine_color)
     # Main loop
     running = True
     selected_piece = None
@@ -110,57 +135,58 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                col = pos[0] // SQUARE_SIZE
-                row = pos[1] // SQUARE_SIZE
-                if board.piece_at(row, col) and board.piece_at(row, col).color == board.current_turn:
-                    selected_piece = board.piece_at(row, col)
-                    selected_pos = (row, col)
-                    valid_moves = selected_piece.get_moves(board, row, col)
-                    dragging = True
-                elif selected_piece and selected_pos and not dragging and board.move_piece(selected_pos, (row, col)):
-                    selected_piece = None
-                    selected_pos = None
-                    valid_moves = []
-                else:
-                    selected_piece = None
-                    selected_pos = None
-                    valid_moves = []
-
-            if event.type == pygame.MOUSEBUTTONUP:
-                if dragging:
+            if board.current_turn == player_color:
+                if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
                     col = pos[0] // SQUARE_SIZE
                     row = pos[1] // SQUARE_SIZE
-                    if board.move_piece(selected_pos, (row, col)):
+                    if board.piece_at(row, col) and board.piece_at(row, col).color == board.current_turn:
+                        selected_piece = board.piece_at(row, col)
+                        selected_pos = (row, col)
+                        valid_moves = selected_piece.get_moves(board, row, col)
+                        dragging = True
+                    elif selected_piece and selected_pos and not dragging and board.move_piece(selected_pos, (row, col), engine):
                         selected_piece = None
                         selected_pos = None
                         valid_moves = []
-                        dragging = False
                     else:
-                        dragging = False
-                elif selected_piece and selected_pos: 
-                    selected_piece = None
-                    selected_pos = None
-                    valid_moves = []
+                        selected_piece = None
+                        selected_pos = None
+                        valid_moves = []
 
-            if event.type == pygame.MOUSEMOTION and dragging:
-                pos = pygame.mouse.get_pos()
-                draw_board(win)
-                draw_pieces(win, board, images, dragging, selected_pos)
-                if selected_pos:
-                    pygame.draw.rect(win, HIGHLIGHT_COLOR, (selected_pos[1] * SQUARE_SIZE, selected_pos[0] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE), 3)
-                    draw_valid_moves(win, valid_moves)
-                draw_turn_indicator(win, board.current_turn)
-                x, y = pos
-                piece_image = images[f'{selected_piece.color}_{selected_piece.piece_type}']
-                win.blit(piece_image, (x - SQUARE_SIZE // 2, y - SQUARE_SIZE // 2))
-                pygame.display.flip()
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if dragging:
+                        pos = pygame.mouse.get_pos()
+                        col = pos[0] // SQUARE_SIZE
+                        row = pos[1] // SQUARE_SIZE
+                        if board.move_piece(selected_pos, (row, col), engine):
+                            #remember move for engine
+                            #move = (selected_pos, (row, col))
+                            #print(move)
+                            #engine.update(move, board)
+                            selected_piece = None
+                            selected_pos = None
+                            valid_moves = []
+                            dragging = False
+                        else:
+                            dragging = False
+                    elif selected_piece and selected_pos: 
+                        selected_piece = None
+                        selected_pos = None
+                        valid_moves = []
 
-        
-        
-            
+                if event.type == pygame.MOUSEMOTION and dragging:
+                    pos = pygame.mouse.get_pos()
+                    draw_board(win)
+                    draw_pieces(win, board, images, dragging, selected_pos)
+                    if selected_pos:
+                        pygame.draw.rect(win, HIGHLIGHT_COLOR, (selected_pos[1] * SQUARE_SIZE, selected_pos[0] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE), 3)
+                        draw_valid_moves(win, valid_moves)
+                    draw_turn_indicator(win, board.current_turn)
+                    x, y = pos
+                    piece_image = images[f'{selected_piece.color}_{selected_piece.piece_type}']
+                    win.blit(piece_image, (x - SQUARE_SIZE // 2, y - SQUARE_SIZE // 2))
+                    pygame.display.flip()
             
         # Redraw the board, pieces, and highlights in every loop iteration
         if not dragging:
@@ -172,10 +198,19 @@ def main():
             draw_turn_indicator(win, board.current_turn)
             pygame.display.flip()
 
-        #promotion to choose piece
+        # Handle the engine's turn
+        if board.current_turn == engine_color:
+            engine_start_pos, engine_end_pos = engine.engine_move(board)
+            print(engine_start_pos, engine_end_pos)
+            board.move_piece(engine_start_pos, engine_end_pos, None)
+
+        # Promotion to choose piece
         if board.promotion:
-            piece = draw_promotion_window(win, board)
-            print(piece)
+            if board.current_turn == engine_color: # Counterintuitive, but move has passed to other party before this check
+                piece = draw_promotion_window(win, board)
+                print(piece)
+            else:
+                piece = 'queen'
             board.promotion_piece(piece)
 
     pygame.quit()
