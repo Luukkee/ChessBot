@@ -1,4 +1,4 @@
-# Chess Engine & Machine Learning Model
+# Chess Engine & Chess Game
 
 This is a personal project where I created the game of chess and a machine learning model designed to play it, with a target performance goal of approximately 2000 Elo (Currently at ~1700 - 1800). Unlike many traditional chess engines that rely on complex search algorithms such as Monte-Carlo Tree Search (MCTS) or alpha-beta pruning, this engine takes a unique approach: it operates **completely searchless**.
 
