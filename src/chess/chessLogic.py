@@ -3,6 +3,7 @@
 """"""""""""""""""
 SQUARES = [(x, y) for x in range(8) for y in range(8)]
 
+
 class Piece:
     def __init__(self, color):
         self.color = color
@@ -10,7 +11,7 @@ class Piece:
     def fen_char(self):
         pass
 
-    def get_moves(self, board, row, col):
+    def get_moves(self, board, row, col, not_safe):
         pass
 
 class King(Piece):
@@ -22,7 +23,7 @@ class King(Piece):
     def fen_char(self):
         return 'K' if self.color == 'white' else 'k'
 
-    def get_moves(self, board, row, col):
+    def get_moves(self, board, row, col, not_safe = False):
         moves = []
         for i in range(-1, 2):
             for j in range(-1, 2):
@@ -31,19 +32,29 @@ class King(Piece):
                 new_row, new_col = row + i, col + j
                 if 0 <= new_row < 8 and 0 <= new_col < 8:
                     piece = board.piece_at(new_row, new_col)
-                    if not piece or piece.color != self.color:
+                    if (not piece or piece.color != self.color) and (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
                         moves.append((new_row, new_col))
-        #Castling
+        
         if board.castling_rights[self.color]['kingside']:
             if not board.piece_at(row, 5) and not board.piece_at(row, 6):
                 rook = board.piece_at(row, 7)
                 if rook and rook.piece_type == 'rook' and rook.color == self.color:
-                    moves.append((row, 6))
+                    if (not_safe or not board.is_in_check(self.color) and 
+                        not board.is_under_attack(row, 4, self.color) and 
+                        not board.is_under_attack(row, 5, self.color) and 
+                        not board.is_under_attack(row, 6, self.color)):
+                        if (not_safe or board.is_safe_move(self, (row, col), (row, 6))):  
+                            moves.append((row, 6))
         if board.castling_rights[self.color]['queenside']:
             if not board.piece_at(row, 1) and not board.piece_at(row, 2) and not board.piece_at(row, 3):
                 rook = board.piece_at(row, 0)
                 if rook and rook.piece_type == 'rook' and rook.color == self.color:
-                    moves.append((row, 2))
+                    if (not_safe or not board.is_in_check(self.color) and 
+                        not board.is_under_attack(row, 4, self.color) and 
+                        not board.is_under_attack(row, 3, self.color) and 
+                        not board.is_under_attack(row, 2, self.color)):
+                        if (not_safe or board.is_safe_move(self, (row, col), (row, 2))):  
+                            moves.append((row, 2))
         return moves
 
 class Queen(Piece):
@@ -55,7 +66,7 @@ class Queen(Piece):
     def fen_char(self):
         return 'Q' if self.color == 'white' else 'q'
 
-    def get_moves(self, board, row, col):
+    def get_moves(self, board, row, col, not_safe = False):
         moves = []
         for i in range(-1, 2):
             for j in range(-1, 2):
@@ -64,10 +75,11 @@ class Queen(Piece):
                 new_row, new_col = row + i, col + j
                 while 0 <= new_row < 8 and 0 <= new_col < 8:
                     piece = board.piece_at(new_row, new_col)
-                    if not piece or piece.color != self.color:
-                        moves.append((new_row, new_col))
-                        if piece:
-                            break
+                    if (not piece or piece.color != self.color):
+                        if (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
+                            moves.append((new_row, new_col))
+                            if piece:
+                                break
                     else:
                         break
                     new_row += i
@@ -83,27 +95,29 @@ class Rook(Piece):
     def fen_char(self):
         return 'R' if self.color == 'white' else 'r'
 
-    def get_moves(self, board, row, col):
+    def get_moves(self, board, row, col, not_safe = False):
         moves = []
         for i in range(-1, 2, 2):
             new_row, new_col = row + i, col
             while 0 <= new_row < 8:
                 piece = board.piece_at(new_row, new_col)
-                if not piece or piece.color != self.color:
-                    moves.append((new_row, new_col))
-                    if piece:
-                        break
-                else:
+                if (not piece or piece.color != self.color):
+                    if (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
+                        moves.append((new_row, new_col))
+                        if piece:
+                            break
+                elif (piece or piece.color == self.color):
                     break
                 new_row += i
         for i in range(-1, 2, 2):
             new_row, new_col = row, col + i
             while 0 <= new_col < 8:
                 piece = board.piece_at(new_row, new_col)
-                if not piece or piece.color != self.color:
-                    moves.append((new_row, new_col))
-                    if piece:
-                        break
+                if (not piece or piece.color != self.color):
+                    if (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
+                        moves.append((new_row, new_col))
+                        if piece:
+                            break
                 else:
                     break
                 new_col += i
@@ -118,17 +132,18 @@ class Bishop(Piece):
     def fen_char(self):
         return 'B' if self.color == 'white' else 'b'
 
-    def get_moves(self, board, row, col):
+    def get_moves(self, board, row, col, not_safe = False):
         moves = []
         for i in range(-1, 2, 2):
             for j in range(-1, 2, 2):
                 new_row, new_col = row + i, col + j
                 while 0 <= new_row < 8 and 0 <= new_col < 8:
                     piece = board.piece_at(new_row, new_col)
-                    if not piece or piece.color != self.color:
-                        moves.append((new_row, new_col))
-                        if piece:
-                            break
+                    if (not piece or piece.color != self.color):
+                        if (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
+                            moves.append((new_row, new_col))
+                            if piece:
+                                break
                     else:
                         break
                     new_row += i
@@ -144,7 +159,7 @@ class Knight(Piece):
     def fen_char(self):
         return 'N' if self.color == 'white' else 'n'
 
-    def get_moves(self, board, row, col):
+    def get_moves(self, board, row, col, not_safe = False):
         moves = []
         for i in [-2, -1, 1, 2]:
             for j in [-2, -1, 1, 2]:
@@ -152,7 +167,7 @@ class Knight(Piece):
                     new_row, new_col = row + i, col + j
                     if 0 <= new_row < 8 and 0 <= new_col < 8:
                         piece = board.piece_at(new_row, new_col)
-                        if not piece or piece.color != self.color:
+                        if (not piece or piece.color != self.color) and (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
                             moves.append((new_row, new_col))
         return moves
 
@@ -165,27 +180,35 @@ class Pawn(Piece):
     def fen_char(self):
         return 'P' if self.color == 'white' else 'p'
 
-    def get_moves(self, board, row, col):
+    def get_moves(self, board, row, col, not_safe = False):
         moves = []
         direction = -1 if self.color == 'white' else 1
         new_row, new_col = row + direction, col
+        # Single-square advance
+        new_row, new_col = row + direction, col
         if 0 <= new_row < 8:
             piece = board.piece_at(new_row, new_col)
-            if not piece:
+            if (not piece) and (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
                 moves.append((new_row, new_col))
-                if (row == 1 and self.color == 'black') or (row == 6 and self.color == 'white'):
-                    new_row += direction
-                    piece = board.piece_at(new_row, new_col)
-                    if not piece:
+
+        # Double-square advance (only from the starting row) - consider independently of the first step
+        if (row == 1 and self.color == 'black') or (row == 6 and self.color == 'white'):
+            new_row = row + 2 * direction
+            new_col = col
+            if 0 <= new_row < 8:  # Ensure the move is within bounds
+                piece = board.piece_at(new_row, new_col)
+                # Ensure the square is empty and check if the double move is valid independently
+                if (not piece) and board.piece_at(row + direction, col) is None:  # Ensure the intermediate square is empty
+                    if (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
                         moves.append((new_row, new_col))
         for i in [-1, 1]:
             #en passant
-            if board.en_passant_target and board.en_passant_target == (row + direction, col + i):
+            if (board.en_passant_target and board.en_passant_target == (row + direction, col + i)) and (not_safe or board.is_safe_move(self, (row, col), (row + direction, col + i), True)):
                 moves.append((row + direction, col + i))
             new_row, new_col = row + direction, col + i
             if 0 <= new_row < 8 and 0 <= new_col < 8:
                 piece = board.piece_at(new_row, new_col)
-                if piece and piece.color != self.color:
+                if (piece and piece.color != self.color) and (not_safe or board.is_safe_move(self, (row, col), (new_row, new_col))):
                     moves.append((new_row, new_col))
         return moves
 
@@ -225,6 +248,43 @@ class Board:
                     piece = self.create_piece(piece_type, color)
                     self.board[rank_idx][file_idx] = piece
                     file_idx += 1
+
+    def parse_castling_rights(self, castling_str):
+        """
+        Parses the castling rights from the FEN string and returns a dictionary.
+        Example input: 'KQkq'
+        Example output: {'white': {'kingside': True, 'queenside': True}, 'black': {'kingside': True, 'queenside': True}}
+        """
+        castling_rights = {'white': {'kingside': False, 'queenside': False},
+                            'black': {'kingside': False, 'queenside': False}}
+        if 'K' in castling_str:
+            castling_rights['white']['kingside'] = True
+        if 'Q' in castling_str:
+            castling_rights['white']['queenside'] = True
+        if 'k' in castling_str:
+            castling_rights['black']['kingside'] = True
+        if 'q' in castling_str:
+            castling_rights['black']['queenside'] = True
+
+        return castling_rights
+    
+    def parse_en_passant(self, en_passant_str):
+        """
+        Parses the en passant target square from the FEN string.
+        Converts algebraic notation (e.g., 'e3') to (row, col) tuple.
+        Returns None if no en passant is possible.
+        """
+        if en_passant_str == '-':
+            return None  # No en passant target
+
+        files = 'abcdefgh'
+        file = en_passant_str[0]  # Column letter (e.g., 'e')
+        rank = en_passant_str[1]  # Row number (e.g., '3')
+
+        col = files.index(file)  # Convert file ('a'-'h') to column index (0-7)
+        row = 8 - int(rank)      # Convert rank ('1'-'8') to row index (7-0)
+
+        return (row, col)
 
     # Helper to create pieces from the FEN character
     def create_piece(self, piece_type, color):
@@ -368,7 +428,7 @@ class Board:
     def piece_at(self, row, col):
         return self.board[row][col]
 
-    def move_piece(self, start_pos, end_pos, engine):
+    def move_piece(self, start_pos, end_pos, engine=None):
         piece = self.piece_at(*start_pos)
 
         if piece and piece.color == self.current_turn:
@@ -380,10 +440,15 @@ class Board:
                 self.board[end_pos[0]][end_pos[1]] = piece
                 self.board[start_pos[0]][start_pos[1]] = None
                 self.current_turn = 'black' if self.current_turn == 'white' else 'white'
-                print(self.en_passant_target)
 
                 if self.is_in_check(self.current_turn):
                     print(f"Check! {self.current_turn} is in check.")
+                    
+                    # Check for checkmate
+                    if self.is_checkmate(self.current_turn):
+                        print(f"Checkmate! {self.current_turn} loses the game.")
+                        return True  # Game over
+
                 return True
         return False
 
@@ -408,7 +473,7 @@ class Board:
             self.promotion = None
 
     def handle_special_moves(self, piece, start_pos, end_pos):
-        print(end_pos)
+        #print(end_pos)
         # takes with en passant
         if piece.piece_type == 'pawn' and end_pos == self.en_passant_target:
             self.board[start_pos[0]][end_pos[1]] = None
@@ -446,7 +511,7 @@ class Board:
             for c in range(8):
                 piece = self.piece_at(r, c)
                 if piece and piece.color == opponent_color:
-                    if (row, col) in piece.get_moves(self, r, c):
+                    if (row, col) in piece.get_moves(self, r, c, True):
                         return True
         return False
 
@@ -463,4 +528,69 @@ class Board:
         if king_pos:
             return self.is_under_attack(*king_pos, color)
         return False
+    
+    def is_checkmate(self, color):
+        """
+        Checks if the player of the given color is in checkmate.
+        """
+        # If the player is not in check, it's not checkmate
+        if not self.is_in_check(color):
+            return False
+
+        # Check all pieces of the current player
+        for row in range(8):
+            for col in range(8):
+                piece = self.piece_at(row, col)
+                if piece and piece.color == color:
+                    # Get all possible moves for the piece
+                    possible_moves = piece.get_moves(self, row, col, True)
+                    for move in possible_moves:
+                        # Make a hypothetical move and check if it resolves the check
+                        original_piece = self.piece_at(*move)
+                        self.board[move[0]][move[1]] = piece
+                        self.board[row][col] = None
+
+                        if not self.is_in_check(color):
+                            # Undo the move
+                            self.board[row][col] = piece
+                            self.board[move[0]][move[1]] = original_piece
+                            return False  # There's at least one valid move, so no checkmate
+
+                        # Undo the move
+                        self.board[row][col] = piece
+                        self.board[move[0]][move[1]] = original_piece
+
+        # No valid moves found, it's checkmate
+        return True
         
+    def is_safe_move(self, piece, start_pos, end_pos, en_passant=False):
+        """
+        Simulates a move and checks if it leaves the player's king in check.
+        """
+        original_piece = self.piece_at(*end_pos)
+        self.board[end_pos[0]][end_pos[1]] = piece  # Make the move
+        self.board[start_pos[0]][start_pos[1]] = None
+        tmp_piece = None  # Track en passant captures
+
+        # Handle en passant captures
+        if en_passant and self.en_passant_target:
+            tmp_piece = self.piece_at(start_pos[0], end_pos[1])
+            self.board[start_pos[0]][end_pos[1]] = None
+
+        is_safe = not self.is_in_check(piece.color)  # Check if king is safe
+        
+
+        # Undo the move
+        self.board[start_pos[0]][start_pos[1]] = piece
+        self.board[end_pos[0]][end_pos[1]] = original_piece
+
+        if en_passant and self.en_passant_target:
+            print(self.en_passant_target)
+            print("EN PASSANT")
+            print(start_pos[0], end_pos[1])
+            print(tmp_piece)
+            print(is_safe)
+            print(self.generate_fen())
+            self.board[start_pos[0]][end_pos[1]] = tmp_piece
+
+        return is_safe

@@ -115,11 +115,12 @@ def main():
     win = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Chess')
     images = load_images()
-    board = chess.Board()  # Create a new board
+    board = chess.Board("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10")  # Create a new board
+    #board = chess.Board()
 
     player_color = choose_color(win)
     engine_color = 'black' if player_color == 'white' else 'white'
-    engine = Engine(engine_color)
+    engine = Engine(engine_color, board.generate_fen()=="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
     # Main loop
     running = True
     selected_piece = None
@@ -132,7 +133,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            if board.current_turn == player_color:
+            if board.current_turn == player_color or True:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
                     col = pos[0] // SQUARE_SIZE
@@ -192,10 +193,10 @@ def main():
             pygame.display.flip()
 
         # Handle the engine's turn
-        if board.current_turn == engine_color:
-            engine_start_pos, engine_end_pos = engine.engine_move(board)
-            print(engine_start_pos, engine_end_pos)
-            board.move_piece(engine_start_pos, engine_end_pos, None)
+        #if board.current_turn == engine_color:
+        #    engine_start_pos, engine_end_pos = engine.engine_move(board)
+        #    print(engine_start_pos, engine_end_pos)
+        #    board.move_piece(engine_start_pos, engine_end_pos, None)
 
         # Promotion to choose piece
         if board.promotion:

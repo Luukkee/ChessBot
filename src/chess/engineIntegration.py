@@ -123,9 +123,9 @@ openings_file_path = os.path.join(model_folder_path, "eco.pgn")
 openings = load_openings_from_pgn(openings_file_path)
 
 class Engine:
-    def __init__(self, color):
+    def __init__(self, color, opening_phase):
         self.played_moves = []
-        self.opening_phase = True
+        self.opening_phase = opening_phase
         self.color = color
 
     def square_to_algebraic(self, row, col):
