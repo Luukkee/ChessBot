@@ -448,6 +448,9 @@ class Board:
                     if self.is_checkmate(self.current_turn):
                         print(f"Checkmate! {self.current_turn} loses the game.")
                         return True  # Game over
+                elif self.is_stalemate(self.current_turn):
+                    print("Stalemate! The game is a draw.")
+                    return True
 
                 return True
         return False
@@ -561,6 +564,40 @@ class Board:
                         self.board[move[0]][move[1]] = original_piece
 
         # No valid moves found, it's checkmate
+        return True
+    
+    def is_stalemate(self, color):
+        """
+        Checks if the current player of the given color is in stalemate.
+        Stalemate occurs if the player is not in check but has no legal moves.
+        """
+        # Step 1: The player must not be in check
+        if self.is_in_check(color):
+            return False
+
+        # Step 2: Check if the player has any legal moves
+        for row in range(8):
+            for col in range(8):
+                piece = self.piece_at(row, col)
+                if piece and piece.color == color:
+                    possible_moves = piece.get_moves(self, row, col, True)
+                    for move in possible_moves:
+                        # Simulate the move to see if it leaves the King in check
+                        original_piece = self.piece_at(*move)
+                        self.board[move[0]][move[1]] = piece
+                        self.board[row][col] = None
+
+                        if not self.is_in_check(color):
+                            # Undo the move
+                            self.board[row][col] = piece
+                            self.board[move[0]][move[1]] = original_piece
+                            return False  # The player has at least one valid move
+
+                        # Undo the move
+                        self.board[row][col] = piece
+                        self.board[move[0]][move[1]] = original_piece
+
+        # If no valid moves are found and the player is not in check, it's stalemate
         return True
         
     def is_safe_move(self, piece, start_pos, end_pos, en_passant=False):
