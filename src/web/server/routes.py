@@ -24,10 +24,8 @@ def make_move(game_id):
     if game.game_status != 'ongoing':
         return jsonify({"status": "error", "message": "Game is already over"}), 400
 
-    # Load the engine (reinitialize from the game state if needed)
     board = Board(game.fen)
-    engine = Engine(color="white" if game.player_color=="black" else "black", opening_phase=game.opening_phase, played_moves=game.moves.split(" "))  # Initialize your engine class
-    engine.load_state(game.fen, game.moves)  # Load the FEN and apply any previous moves
+    engine = Engine(color="white" if game.player_color=="black" else "black", opening_phase=game.opening_phase, played_moves=game.moves.split(" "))
 
     # Apply the move to the engine
     engine_start_pos, engine_end_pos = engine.engine_move(board)
@@ -50,7 +48,6 @@ def move(game_id):
     if game.game_status != 'ongoing':
         return jsonify({"status": "error", "message": "Game is already over"}), 400
 
-    # Load the engine (reinitialize from the game state if needed)
     board = Board(game.fen)
     move = request.json.get('move')
     start_pos = move.get('start_pos')
@@ -92,7 +89,6 @@ def possible_moves(game_id):
     if not game:
         return jsonify({"status": "error", "message": "Game not found"}), 404
 
-    # Load the engine (reinitialize from the game state if needed)
     board = Board(game.fen)
     square = request.json.get('square')
     row, col = square.get('row'), square.get('col')
