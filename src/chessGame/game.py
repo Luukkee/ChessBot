@@ -119,7 +119,7 @@ def main():
 
     player_color = choose_color(win)
     engine_color = 'black' if player_color == 'white' else 'white'
-    engine = Engine(engine_color, board.generate_fen()=="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+    engine = Engine(color=engine_color, opening_phase=board.generate_fen()=="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
     # Main loop
     running = True
     selected_piece = None

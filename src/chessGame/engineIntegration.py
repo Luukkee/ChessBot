@@ -123,8 +123,8 @@ openings_file_path = os.path.join(model_folder_path, "eco.pgn")
 openings = load_openings_from_pgn(openings_file_path)
 
 class Engine:
-    def __init__(self, color, opening_phase):
-        self.played_moves = []
+    def __init__(self, color="white", opening_phase=True, played_moves=[]):
+        self.played_moves = played_moves
         self.opening_phase = opening_phase
         self.color = color
 
@@ -138,7 +138,7 @@ class Engine:
         file = files[col]  # Get file from 'a'-'h'
         return f"{file}{rank}"
 
-    def update(self, move, board):
+    def update(self, move, board, actual = True):
         from_square, to_square = move
         from_row, from_col = from_square
         to_row, to_col = to_square
@@ -155,8 +155,8 @@ class Engine:
         move = tmp_board.san(move_obj)
 
         del tmp_board
-        
-        self.played_moves.append(move)
+        if actual:
+            self.played_moves.append(move)
         return move
 
     def engine_move(self, board):
