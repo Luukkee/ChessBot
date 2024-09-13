@@ -1,0 +1,47 @@
+.square {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+  }
+  
+  .chess-board {
+    display: grid;
+    grid-template-columns: repeat(8, 60px); 
+    grid-template-rows: repeat(8, 60px);    
+  }
+  
+  .square:nth-child(even) {
+    background-color: #769656;
+  }
+  
+  .square:nth-child(odd) {
+    background-color: #eeeed2; 
+  }
+
+    .highlight {
+    background-color: yellow !important;
+    }
+
+    .piece {
+    width: 50px;
+    height: 50px;
+    background-size: cover;
+    }
+
+
+    .wP { background-image: url('../../../../chessGame/images/white_pawn.png'); }
+    .wR { background-image: url('../../../../chessGame/images/white_rook.png'); }
+    .wN { background-image: url('../../../../chessGame/images/white_knight.png'); }
+    .wB { background-image: url('../../../../chessGame/images/white_bishop.png'); }
+    .wQ { background-image: url('../../../../chessGame/images/white_queen.png'); }
+    .wK { background-image: url('../../../../chessGame/images/white_king.png'); }
+    .bR { background-image: url('../../../../chessGame/images/black_rook.png'); }
+    .bN { background-image: url('../../../../chessGame/images/black_knight.png'); }
+    .bB { background-image: url('../../../../chessGame/images/black_bishop.png'); }
+    .bQ { background-image: url('../../../../chessGame/images/black_queen.png'); }
+    .bK { background-image: url('../../../../chessGame/images/black_king.png'); }
+    .bP { background-image: url('../../../../chessGame/images/black_pawn.png'); }
+

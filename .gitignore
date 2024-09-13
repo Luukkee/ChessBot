@@ -13,3 +13,4 @@ env
 Datasets
 #Saved models
 *.pth
+*.sqlite
