@@ -1,6 +1,6 @@
 from models import db
 from dataBase import app
-
+from routes import *
 import os
 
 #Run application

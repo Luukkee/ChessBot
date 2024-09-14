@@ -1,21 +1,26 @@
+import sys, os
 from models import *
 from dataBase import app
 from flask import abort, request, redirect
 from flask import jsonify, json, url_for
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+# Now you can import modules from chessGame
 from chessGame import Engine
 from chessGame import Board
 
 
-@app.route('/new_game', methods=['POST'])
+@app.route('/new_game/<player_color>', methods=['POST'])
 def new_game(player_color):
     # Create a new game
+    player_color = "white" if player_color==1 else "black"
     game = ChessGame(fen=Board().generate_fen(), player_color=player_color)
     db.session.add(game)
     db.session.commit()
 
     return jsonify({"status": "success", "game_id": game.id, "fen": game.fen})
 
-@app.route('/engine_move/<game_id>', methods=['POST'])
+@app.route('/engine_move/<game_id>', methods=['PUT'])
 def make_move(game_id):
     # Load the game from the database
     game = ChessGame.query.get_or_404(game_id)
@@ -25,14 +30,20 @@ def make_move(game_id):
         return jsonify({"status": "error", "message": "Game is already over"}), 400
 
     board = Board(game.fen)
-    engine = Engine(color="white" if game.player_color=="black" else "black", opening_phase=game.opening_phase, played_moves=game.moves.split(" "))
+    engine = Engine(color="white" if game.player_color=="black" else "black", opening_phase=game.opening_phase, played_moves=[] if not game.moves else game.moves.split(" "))
 
     # Apply the move to the engine
-    engine_start_pos, engine_end_pos = engine.engine_move(board)
-
+    engine_move = engine.engine_move(board)
+    if not engine_move:
+        return jsonify({"status": "error", "message": "No valid moves found"}), 400
+    engine_start_pos, engine_end_pos = engine_move
+    print(engine_start_pos, engine_end_pos)
+    next_move = engine.update((engine_start_pos, engine_end_pos), board, True)
     if board.move_piece(engine_start_pos, engine_end_pos, None):
         game.fen = board.generate_fen()
-        game.moves = (game.moves or '') + engine.update((engine_start_pos, engine_end_pos), board, actual=False)  # Update move history
+        next_move = engine.played_moves[-1] if engine.opening_phase else next_move
+        game.moves = (game.moves or '') + next_move + " "  # Update move history
+        game.opening_phase = engine.opening_phase
         db.session.commit()
 
         return jsonify({"status": "success", "fen": game.fen})

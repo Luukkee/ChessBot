@@ -1,2 +1,2 @@
-from engineIntegration import Engine
-from chessGame import Board
+from .engineIntegration import Engine
+from .chessLogic import Board

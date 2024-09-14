@@ -1,5 +1,5 @@
 import os
-from engineModel import *
+from .engineModel import *
 import chess
 import chess.pgn
 import random
@@ -176,9 +176,12 @@ class Engine:
             return move
         else:
             print("Engine move")
-            bot_move = predict_move(model, board)
-            self.opening_phase = False
-            if bot_move:
-                return board.parse_move(bot_move)
+            if (board.current_turn == self.color):
+                bot_move = predict_move(model, board)
+                self.opening_phase = False
+                if bot_move:
+                    return board.parse_move(bot_move)
+                else:
+                    return None
             else:
                 return None
