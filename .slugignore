@@ -1,0 +1,29 @@
+node_modules/
+venv/
+.env
+*.log
+*.csv
+*.mp4
+*.zip
+*.tar.gz
+__pycache__/
+staticfiles/
+media/
+tmp/
+
+# Byte-compiled 
+__pycache__
+#Virtual environment
+venv
+env
+.venv
+.env
+#datasets and database
+*.db
+*.db-shm
+*.db-wal
+.zip
+Datasets
+#Saved models
+*.pth
+*.sqlite
