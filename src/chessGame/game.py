@@ -191,20 +191,33 @@ def main():
             draw_turn_indicator(win, board.current_turn)
             pygame.display.flip()
 
+        if board.promotion:
+            if board.current_turn == engine_color: # Counterintuitive, but move has passed to other party before this check
+                
+                piece = draw_promotion_window(win, board)
+                print(piece)
+            else:
+                piece = 'queen'
+            board.promotion_piece(piece)
+            print(board.current_turn)
+
         # Handle the engine's turn
         if board.current_turn == engine_color:
-            engine_start_pos, engine_end_pos = engine.engine_move(board)
+            move, _ = engine.engine_move(board)
+            engine_start_pos, engine_end_pos = move
             print(engine_start_pos, engine_end_pos)
             board.move_piece(engine_start_pos, engine_end_pos, None)
 
         # Promotion to choose piece
         if board.promotion:
             if board.current_turn == engine_color: # Counterintuitive, but move has passed to other party before this check
+                
                 piece = draw_promotion_window(win, board)
                 print(piece)
             else:
                 piece = 'queen'
             board.promotion_piece(piece)
+            print(board.current_turn)
 
     pygame.quit()
     sys.exit()

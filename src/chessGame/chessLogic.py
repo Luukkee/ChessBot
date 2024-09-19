@@ -382,6 +382,7 @@ class Board:
         Parse a Move class instance to from_square and to_square.
         """
         # Convert the move from the Move class to algebraic notation
+
         from_row_col = self.square_index_to_row_col(move.from_square)
         to_row_col = self.square_index_to_row_col(move.to_square)
 

@@ -1,17 +1,21 @@
 import os
-from .engineModel import *
+model_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'model'))
+try:
+    from .engineModel import *
+except ImportError:
+    from engineModel import *
+    model_file_path = os.path.join(model_folder_path, 'savedModels/updated_again_model_current.pth')
+
+    model = ChessNet()
+    model.load_state_dict(torch.load(model_file_path))
+    model.eval()
 import chess
 import chess.pgn
 import random
 import numpy as np
 #from model import eco, ChessNet
 
-model_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'model'))
-model_file_path = os.path.join(model_folder_path, 'savedModels/updated_again_model_current.pth')
 
-model = ChessNet()
-model.load_state_dict(torch.load(model_file_path))
-model.eval()
 
 def load_openings_from_pgn(pgn_file):
     openings = []
@@ -106,11 +110,13 @@ def predict_move(model, board):
         # If pawn and last character is 1 or eight, add 'q' to the move
         # Hopefully this works, always promotes to queen
         # Might be redundant right now
-        if board.piece_at((7-from_square // 8), (to_square % 8)) and board.piece_at((7-from_square // 8), (to_square % 8)).piece_type == "pawn" and (str(move)[-1] == '1' or str(move)[-1] == '8'):
-            move = chess.Move(from_square, to_square, promotion=5) 
+        tmp_board = chess.Board(board.generate_fen())
+
+        if tmp_board.piece_at(from_square).piece_type == 1 and (str(move)[-1] == '1' or str(move)[-1] == '8'):
+            move = chess.Move(from_square, to_square, promotion=5)  
         print(move, move_scores.values[move_index].item())
         
-        tmp_board = chess.Board(board.generate_fen())
+        
 
         if move in tmp_board.legal_moves:
             del tmp_board
@@ -159,11 +165,12 @@ class Engine:
             self.played_moves.append(move)
         return move
 
-    def engine_move(self, board):
+    def engine_move(self, board, model = None):
         if self.opening_phase:
             matching_openings = find_matching_openings(self.played_moves, openings)
             next_move = select_next_move(self.played_moves, matching_openings)
         if self.opening_phase and next_move:
+            print("Opening move")
             self.played_moves.append(next_move)
             fen = board.generate_fen()
             tmp_board = chess.Board(fen)
@@ -171,16 +178,18 @@ class Engine:
             # Really ugly, but I made my own parse_move in the board class. 
             # Does not look pretty right below the Chess library's parse_san, 
             # but theirs simplify the notation while mine converts it to the notation my board uses.
-            move = board.parse_move(move) 
+            move_a = board.parse_move(move) 
             del tmp_board
-            return move
+            return move_a, move
         else:
             print("Engine move")
+            print(board.current_turn)
             if (board.current_turn == self.color):
                 bot_move = predict_move(model, board)
+                print(bot_move)
                 self.opening_phase = False
                 if bot_move:
-                    return board.parse_move(bot_move)
+                    return board.parse_move(bot_move), bot_move
                 else:
                     return None
             else:

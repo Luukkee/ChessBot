@@ -1,7 +1,6 @@
-from models import db
-from dataBase import app
 from routes import *
-import os
+from flask_cors import CORS
+CORS(app)
 
 #Run application
 if __name__ == '__main__': 

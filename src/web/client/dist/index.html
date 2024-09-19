@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Searchless Chess Engine</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A chess engine operating completely searchless."
+    />
+    <meta name="keywords" content="chess, bot, PyTorch, Nikolay" />
+    <meta name="frontend creator" content="Alexander Serkov" />
+    <meta name="reference" content="Skripko Nikolay" />
+    <meta name="engine creator" content="Lukas Ekberg" />
+
+    <script src="https://unpkg.com/lodash@4.17.20"></script>
+
+    <link rel="stylesheet" href="./assets/chessboard.css" />
+    <link rel="stylesheet" href="./assets/extensions/markers/markers.css" />
+    <link
+      rel="stylesheet"
+      href="./assets/extensions/promotion-dialog/promotion-dialog.css"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
+
+    <link rel="stylesheet" href="board.css" />
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <span>LukBot <span class="gm-label">GM</span> (1 ELO)</span>
+    <span id="modelLoading" class="modelLoading hidden">
+      Loading model...
+    </span>
+    <div id="board" class="board"></div>
+    <button id="flipBoardButton" class="hidden">Flip board</button>
+    <button id="autoPlayButton" class="hidden">Auto play</button>
+    <overlay id="overlay" class="overlay hidden">
+      <div class="overlay-content">
+        <span id="gameOverText">Game over</span>
+        <span class="gameCode">
+          Your game <button id="gameCode">FEN string</button>
+        </span>
+        <button id="restartButton">Restart</button>
+        <a href="https://chess.wintrcat.uk/" target="_blank">Analyse</a>
+      </div>
+    </overlay>
+
+    <script src="main.js"></script>
+  </body>
+</html>
