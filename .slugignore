@@ -27,3 +27,5 @@ Datasets
 #Saved models
 *.pth
 *.sqlite
+client/
+src/web/client/
