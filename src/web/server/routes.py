@@ -114,20 +114,3 @@ def get_game(game_id):
         return jsonify({"status": "error", "message": "Game not found"}), 404
 
     return jsonify({"status": "success", "fen": game.fen, "moves": game.moves, "game_status": game.game_status})
-
-#@app.route('/possible_moves/<game_id>', methods=['GET'])
-#def possible_moves(game_id):
-#    # Load the game from the database
-#    game = ChessGame.query.get_or_404(game_id)
-#    if not game:
-#        return jsonify({"status": "error", "message": "Game not found"}), 404
-#
-#    board = Board(game.fen)
-#    square = request.json.get('square')
-#    row, col = square.get('row'), square.get('col')
-#    piece = board.piece_at(row, col)
-#    if not piece:
-#        return jsonify({"status": "error", "message": "No piece at the specified square"}), 400
-#    
-#    moves = piece.get_moves(board, row, col)
-#    return jsonify({"status": "success", "moves": moves})
