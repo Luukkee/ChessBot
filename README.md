@@ -29,11 +29,12 @@ The model has been trained on **3 million elite-level games** from **Lichess**, 
 - **Searchless Engine**: No tree search or brute-force algorithms. The engine makes predictions based on learned patterns and board evaluations alone.
 - **Machine Learning Model**: The core model is built to evaluate the board and select moves in real time, similar to how a human player might analyze positions and make decisions.
 - **Chess Game Implementation**: A fully functional chess game has been implemented using **Pygame**, integrated with the machine learning model for an interactive experience.
+- **Web Integration**: The engine is available to [play against online](https://www.lukasekberg.com/), with a web interface where users can challenge the bot in real time. 
 - **Version 1.0**: The current version (V1.0) of the engine has shown promising results, performing well against other engines and providing a challenging game experience for human players.
 
 ### How It Works
 
-The chess engine processes each board state as an input and outputs the move it believes to be the best, based entirely on the model's prediction. The core machine learning model has been trained on thousands of chess games, learning to evaluate positions and make decisions without the need for lookahead search.
+The chess engine processes each board state as an input and outputs the move it believes to be the best, based entirely on the model's prediction. The core machine learning model has been trained on millions of chess games, learning to evaluate positions and make decisions without the need for lookahead search.
 
 This creates a unique challenge for the engine, as it must rely solely on its training and intuition, unlike most engines that calculate deeply into future moves. The trade-off is an engine that can make lightning-fast decisions, ideal for blitz games or real-time applications.
 
@@ -41,4 +42,4 @@ This creates a unique challenge for the engine, as it must rely solely on its tr
 
 - **Improving Model Performance**: Continue refining the model's architecture and training process to push its performance closer to the target Elo of 2000.
 - **Version 2.0**: The next version will incorporate new training data and potentially a deeper model architecture to improve positional understanding and long-term planning. It might even take advantage of Reinforcement Learning.
-- **Web Integration**: The engine will soon be available to play online, with a web interface where users can challenge the bot in real time. 
+
